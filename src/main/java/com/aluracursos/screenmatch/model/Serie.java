@@ -23,7 +23,7 @@ public class Serie {
     private String actores;
     private String poster;
     private String sinopsis;
-    @Transient
+    @OneToMany(mappedBy = "serie", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Episodio> episodios;
 
     //constructor por defecto creado manualmente ya que al crear un constructor con parametros
@@ -39,6 +39,15 @@ public class Serie {
         this.actores = datosSerie.actores();
         this.sinopsis = datosSerie.sinopsis();
 
+    }
+
+    public List<Episodio> getEpisodios() {
+        return episodios;
+    }
+
+    public void setEpisodios(List<Episodio> episodios) {
+        episodios.forEach(e -> e.setSerie(this));
+        this.episodios = episodios;
     }
 
     public String getTitulo() {
