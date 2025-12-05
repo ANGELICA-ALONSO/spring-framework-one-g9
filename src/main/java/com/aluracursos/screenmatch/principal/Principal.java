@@ -4,6 +4,7 @@ import com.aluracursos.screenmatch.model.*;
 import com.aluracursos.screenmatch.repository.SerieRepository;
 import com.aluracursos.screenmatch.service.ConsumoAPI;
 import com.aluracursos.screenmatch.service.ConvierteDatos;
+import org.hibernate.event.spi.SaveOrUpdateEvent;
 
 import java.net.URL;
 import java.time.LocalDate;
@@ -34,7 +35,10 @@ public class Principal {
                     1 - Buscar series
                     2 - Buscar episodios
                     3 - Mostrar series buscados
-                    
+                    4 - Buscar series por titulo
+                    5 - Top 5
+                    6 - Series por categoria
+                    7 - Filtrar series
                     0 - Salir 
                     """;
             System.out.println(menu);
@@ -50,6 +54,18 @@ public class Principal {
                     break;
                 case 3:
                     mostrarSeriesBuscadas();
+                    break;
+                case 4:
+                    buscarSeriesPorTitulo();
+                    break;
+                case 5:
+                    buscarTopSeries();
+                    break;
+                case 6:
+                    buscarSeriesPorCategoria();
+                    break;
+                case 7:
+                    filtrarSeriesPorTemporadaYEvaluacion();
                     break;
                 case 0:
                     System.out.println("Cerrando la aplicación...");
@@ -116,6 +132,47 @@ public class Principal {
          series.stream()
                 .sorted(Comparator.comparing(Serie::getGenero))
                 .forEach(System.out::println);
+    }
+
+    private void buscarSeriesPorTitulo(){
+        System.out.println("Escribe el nombre de la serie que deseas buscar: ");
+        var nombreSerie = teclado.nextLine();
+        Optional<Serie> serieBuscada = repositorio.findByTituloContainingIgnoreCase(nombreSerie);
+
+        if (serieBuscada.isPresent()) {
+            System.out.println("La serie buscada es" + serieBuscada.get());
+        } else {
+            System.out.println("Serie no encontrada.");
+        }
+    }
+
+    private void buscarTopSeries(){
+        List<Serie> topSeries = repositorio.findTo5ByOrderByEvaluacionDesc();
+        topSeries.forEach(s ->
+                System.out.println("Serie: " + s.getTitulo()+ "Evaluación: " + s.getEvaluacion()));
+    }
+
+    private void buscarSeriesPorCategoria(){
+        System.out.println("Escriba el género/categoria de la serie que desea buscar:");
+        var genero = teclado.nextLine();
+        var categoria = Categoria.fromEspanol(genero);
+
+        List<Serie> seriesPorCategoria = repositorio.findByGenero(categoria);
+        System.out.println("Las series de la categoria: " + genero);
+        seriesPorCategoria.forEach(System.out::println);
+    }
+
+    private void filtrarSeriesPorTemporadaYEvaluacion(){
+        System.out.println("¿A partir de cuántas temporadas quieres filtrar? ");
+        var totalDeTemporadas = teclado.nextInt();
+        teclado.nextLine();
+        System.out.println("¿Apartir de que evaluación quieres filtrar? ");
+        var evaluacion = teclado.nextDouble();
+        teclado.nextLine();
+        List<Serie> filtroSeries = repositorio.findByTotalDeTemporadasLessThanEqualAndEvaluacionGreaterThanEqual(totalDeTemporadas, evaluacion);
+        System.out.println("*** Series filtradas ***");
+        filtroSeries.forEach(s ->
+                System.out.println(s.getTitulo() + "  - evaluacion: " + s.getEvaluacion()));
     }
 
 }
