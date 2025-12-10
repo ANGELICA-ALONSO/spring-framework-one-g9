@@ -4,6 +4,7 @@ import com.aluracursos.screenmatch.model.*;
 import com.aluracursos.screenmatch.repository.SerieRepository;
 import com.aluracursos.screenmatch.service.ConsumoAPI;
 import com.aluracursos.screenmatch.service.ConvierteDatos;
+import org.graalvm.nativeimage.IsolateThread;
 import org.hibernate.event.spi.SaveOrUpdateEvent;
 
 import java.net.URL;
@@ -118,9 +119,9 @@ public class Principal {
             List<DatosTemporadas> temporadas = new ArrayList<>();
 
             for (int i = 1; i <= serieEncontrada.getTotalDeTemporadas(); i++) {
-                var json = consumoApi.obtenerDatos(URL_BASE + serieEncontrada.getTitulo().replace(" ", "+") + API_KEY);
-                DatosTemporadas datosTemporadas = conversor.obtenerDatos(json, DatosTemporadas.class);
-                temporadas.add(datosTemporadas);
+                var json = consumoApi.obtenerDatos(URL_BASE + serieEncontrada.getTitulo().replace(" ", "+") + "&season=" + i + API_KEY);
+                DatosTemporadas datosTemporada = conversor.obtenerDatos(json, DatosTemporadas.class);
+                temporadas.add(datosTemporada);
             }
             temporadas.forEach(System.out::println);
 
@@ -128,7 +129,6 @@ public class Principal {
                     .flatMap(d -> d.episodios().stream()
                             .map(e -> new Episodio(d.numero(), e)))
                     .collect(Collectors.toList());
-
             serieEncontrada.setEpisodios(episodios);
             repositorio.save(serieEncontrada);
         }
