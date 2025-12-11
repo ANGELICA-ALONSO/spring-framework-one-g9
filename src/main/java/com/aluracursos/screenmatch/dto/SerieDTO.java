@@ -5,6 +5,7 @@ import jakarta.persistence.Enumerated;
 
 
 public record SerieDTO(
+        Long id,
         String titulo,
         Integer totalDeTemporadas,
         Double evaluacion,
